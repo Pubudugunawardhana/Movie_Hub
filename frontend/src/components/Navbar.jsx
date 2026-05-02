@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, User, LogOut, Film } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
@@ -6,7 +6,14 @@ import { AuthContext } from '../context/AuthContext';
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -16,8 +23,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-gradient-to-b from-black/90 to-transparent backdrop-blur-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
-      <Link to="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tighter">
+    <nav className={`fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center transition-colors duration-500 ${isScrolled ? 'bg-dark shadow-lg' : 'bg-gradient-to-b from-black/90 via-black/50 to-transparent'}`}>
+      <Link to="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tighter hover:scale-105 transition-transform">
         <Film className="w-8 h-8 fill-current" />
         <span>MOVIEHUB</span>
       </Link>
