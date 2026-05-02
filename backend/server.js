@@ -32,6 +32,7 @@ const enquiryRoutes = require('./routes/enquiries');
 const transactionRoutes = require('./routes/transactions');
 const actorRoutes = require('./routes/actors');
 const categoryRoutes = require('./routes/categories');
+const reviewRoutes = require('./routes/reviews');
 
 app.use('/api/movies', movieRoutes);
 app.use('/api/auth', authRoutes);
@@ -41,6 +42,7 @@ app.use('/api/enquiries', enquiryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/actors', actorRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
