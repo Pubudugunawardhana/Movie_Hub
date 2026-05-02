@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #e50914;
+  --color-dark: #141414;
+  --color-secondary: #2f2f2f;
+}
+
+body {
+  background-color: var(--color-dark);
+  color: white;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.movie-card-gradient {
+  background: linear-gradient(to top, rgba(20, 20, 20, 0.9) 0%, rgba(20, 20, 20, 0) 100%);
+}
