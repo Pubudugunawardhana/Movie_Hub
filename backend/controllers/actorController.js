@@ -11,7 +11,11 @@ exports.getActors = async (req, res) => {
 
 exports.createActor = async (req, res) => {
   try {
-    const actor = new Actor({ name: req.body.name });
+    const actorData = { name: req.body.name };
+    if (req.file) {
+      actorData.photo_url = `http://localhost:5000/uploads/${req.file.filename}`;
+    }
+    const actor = new Actor({ ...actorData, actor_id: Date.now() });
     const savedActor = await actor.save();
     res.status(201).json(savedActor);
   } catch (err) {
