@@ -19,6 +19,7 @@ const Navbar = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${searchQuery}`);
+      setSearchQuery('');
     }
   };
 
@@ -49,7 +50,13 @@ const Navbar = () => {
 
         {user ? (
           <div className="flex items-center gap-4">
-            <Link to="/subscription" className="hover:text-primary transition-colors hidden md:block">Subscribe</Link>
+            {user.subscribed ? (
+              <span className="text-[#E50914] font-bold text-xs hidden md:block capitalize border border-[#E50914]/50 px-3 py-1 rounded-full bg-[#E50914]/10">
+                {user.plan && user.plan !== 'none' ? `${user.plan} Plan` : 'Premium Member'}
+              </span>
+            ) : (
+              <Link to="/subscription" className="hover:text-primary transition-colors hidden md:block font-bold">Subscribe</Link>
+            )}
             <div className="relative group">
               <button className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
                 <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center font-bold text-sm text-primary">
