@@ -16,12 +16,13 @@ const AdminDashboard = () => {
   const [actors, setActors] = useState([]);
   
   const [activeTab, setActiveTab] = useState('overview');
-  const [form, setForm] = useState({ title: '', summary: '', language: 'English', type: 'movie', ibm_rating: 0, trailer_url: '', director: '' });
+  const [form, setForm] = useState({ title: '', summary: '', language: 'English', type: 'movie', ibm_rating: 0, trailer_url: '', director: '', category: '', actors: [] });
   const [posterFile, setPosterFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
 
   const [newCategory, setNewCategory] = useState('');
   const [newActor, setNewActor] = useState('');
+  const [newActorPhoto, setNewActorPhoto] = useState(null);
 
   // Filters
   const [searchTitle, setSearchTitle] = useState('');
@@ -95,7 +96,13 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      Object.keys(form).forEach(key => formData.append(key, form[key]));
+      Object.keys(form).forEach(key => {
+        if (key === 'actors') {
+          form[key].forEach(actorId => formData.append('actors', actorId));
+        } else {
+          formData.append(key, form[key]);
+        }
+      });
       if (posterFile) formData.append('poster', posterFile);
       
       if (editingId) {
@@ -104,7 +111,7 @@ const AdminDashboard = () => {
         formData.append('movie_id', Date.now());
         await axios.post('http://localhost:5000/api/movies', formData, authHeaders());
       }
-      setForm({ title: '', summary: '', language: 'English', type: 'movie', ibm_rating: 0, trailer_url: '', director: '' });
+      setForm({ title: '', summary: '', language: 'English', type: 'movie', ibm_rating: 0, trailer_url: '', director: '', category: '', actors: [] });
       setPosterFile(null);
       setEditingId(null);
       fetchMovies();
@@ -118,6 +125,8 @@ const AdminDashboard = () => {
     setForm({
       title: movie.title, summary: movie.summary || '', language: movie.language, type: movie.type,
       ibm_rating: movie.ibm_rating || 0, trailer_url: movie.trailer_url || '', director: movie.director || '',
+      category: movie.category?._id || movie.category || '',
+      actors: movie.actors?.map(a => a._id || a) || []
     });
     setPosterFile(null); setEditingId(movie.movie_id); setActiveTab('add'); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -143,6 +152,12 @@ const AdminDashboard = () => {
     fetchEnquiries();
   };
 
+  const handleDeleteEnquiry = async (id) => {
+    if (!window.confirm('Delete this enquiry?')) return;
+    await axios.delete(`http://localhost:5000/api/enquiries/${id}`, authHeaders());
+    fetchEnquiries();
+  };
+
   // Metadata Actions
   const handleAddCategory = async (e) => {
     e.preventDefault();
@@ -156,8 +171,11 @@ const AdminDashboard = () => {
   const handleAddActor = async (e) => {
     e.preventDefault();
     if (!newActor.trim()) return;
-    await axios.post('http://localhost:5000/api/actors', { name: newActor }, authHeaders());
-    setNewActor(''); fetchActors();
+    const formData = new FormData();
+    formData.append('name', newActor);
+    if (newActorPhoto) formData.append('photo', newActorPhoto);
+    await axios.post('http://localhost:5000/api/actors', formData, authHeaders());
+    setNewActor(''); setNewActorPhoto(null); fetchActors();
   };
   const handleDeleteActor = async (id) => {
     await axios.delete(`http://localhost:5000/api/actors/${id}`, authHeaders()); fetchActors();
@@ -296,7 +314,7 @@ const AdminDashboard = () => {
                 <option value="All">All Types</option><option value="movie">Movie</option><option value="series">Series</option>
               </select>
             </div>
-            <button onClick={() => { setEditingId(null); setForm({ title: '', summary: '', language: 'English', type: 'movie', ibm_rating: 0, trailer_url: '', director: '' }); setPosterFile(null); setActiveTab('add'); }} className="flex items-center gap-2 bg-primary hover:bg-red-700 text-white font-bold px-6 py-2 rounded-xl transition-all w-full md:w-auto justify-center">
+            <button onClick={() => { setEditingId(null); setForm({ title: '', summary: '', language: 'English', type: 'movie', ibm_rating: 0, trailer_url: '', director: '', category: '', actors: [] }); setPosterFile(null); setActiveTab('add'); }} className="flex items-center gap-2 bg-primary hover:bg-red-700 text-white font-bold px-6 py-2 rounded-xl transition-all w-full md:w-auto justify-center">
               <Plus className="w-5 h-5" /> Add New Movie
             </button>
           </div>
@@ -322,25 +340,70 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
-      )}
-
-      {/* Add/Edit Movie Form */}
+      )}      {/* Add/Edit Movie Form */}
       {activeTab === 'add' && (
-        <div className="max-w-2xl">
-          <form onSubmit={handleSubmitMovie} className="bg-secondary/50 border border-secondary rounded-2xl p-8 space-y-5">
-            {/* Same form as before */}
-            <h2 className="text-xl font-bold">{editingId ? 'Edit Movie' : 'Add New Movie'}</h2>
-            <div><label className="block text-sm text-gray-400 mb-2">Title *</label><input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary focus:border-primary" /></div>
-            <div><label className="block text-sm text-gray-400 mb-2">Summary</label><textarea rows={4} value={form.summary} onChange={e => setForm({...form, summary: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-sm text-gray-400 mb-2">Language</label><select value={form.language} onChange={e => setForm({...form, language: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary"><option>English</option><option>Tamil</option><option>Sinhala</option><option>Hindi</option></select></div>
-              <div><label className="block text-sm text-gray-400 mb-2">Type</label><select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary"><option value="movie">Movie</option><option value="series">Series</option></select></div>
+        <div className="w-full">
+          <form onSubmit={handleSubmitMovie} className="bg-secondary/50 border border-secondary rounded-2xl p-8">
+            <h2 className="text-xl font-bold mb-6">{editingId ? 'Edit Movie' : 'Add New Movie'}</h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Details */}
+              <div className="space-y-5">
+                <div><label className="block text-sm text-gray-400 mb-2">Title *</label><input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary focus:border-primary" /></div>
+                <div><label className="block text-sm text-gray-400 mb-2">Summary</label><textarea rows={4} value={form.summary} onChange={e => setForm({...form, summary: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-sm text-gray-400 mb-2">Language</label><select value={form.language} onChange={e => setForm({...form, language: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary"><option>English</option><option>Tamil</option><option>Sinhala</option><option>Hindi</option></select></div>
+                  <div><label className="block text-sm text-gray-400 mb-2">Type</label><select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary"><option value="movie">Movie</option><option value="series">Series</option></select></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Category</label>
+                    <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary focus:border-primary">
+                      <option value="">Select Category</option>
+                      {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                  <div><label className="block text-sm text-gray-400 mb-2">IBM Rating</label><input type="number" min={0} max={10} step={0.1} value={form.ibm_rating} onChange={e => setForm({...form, ibm_rating: parseFloat(e.target.value)})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
+                </div>
+              </div>
+
+              {/* Right Column - Media & Crew */}
+              <div className="space-y-5">
+                <div><label className="block text-sm text-gray-400 mb-2">Director</label><input value={form.director} onChange={e => setForm({...form, director: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
+                <div><label className="block text-sm text-gray-400 mb-2">Trailer URL</label><input value={form.trailer_url} onChange={e => setForm({...form, trailer_url: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Actors</label>
+                  <div className="w-full bg-dark text-white p-4 rounded-lg border border-secondary max-h-40 overflow-y-auto flex flex-wrap gap-3">
+                    {actors.map(a => (
+                      <label key={a._id} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer border transition-colors ${form.actors.includes(a._id) ? 'bg-primary/20 border-primary' : 'bg-secondary/50 border-transparent hover:border-gray-500'}`}>
+                        <input type="checkbox" checked={form.actors.includes(a._id)} onChange={(e) => {
+                          const newActors = e.target.checked ? [...form.actors, a._id] : form.actors.filter(id => id !== a._id);
+                          setForm({...form, actors: newActors});
+                        }} className="hidden" />
+                        {a.photo_url ? (
+                          <img src={a.photo_url} alt={a.name} className="w-6 h-6 object-cover rounded-full" />
+                        ) : (
+                          <UserIcon className="w-5 h-5 text-gray-400" />
+                        )}
+                        <span className="text-sm font-medium">{a.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Poster Image</label>
+                  <input type="file" accept="image/*" onChange={e => setPosterFile(e.target.files[0])} className="w-full bg-dark text-gray-400 px-4 py-4 rounded-lg border border-secondary text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30" />
+                  {posterFile && (
+                    <div className="mt-4 flex gap-4 items-center bg-dark p-4 rounded-lg border border-secondary">
+                      <p className="text-sm text-gray-400 font-medium">Preview:</p>
+                      <img src={URL.createObjectURL(posterFile)} alt="Preview" className="h-32 w-24 object-cover rounded-lg shadow-lg" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-            <div><label className="block text-sm text-gray-400 mb-2">Director</label><input value={form.director} onChange={e => setForm({...form, director: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
-            <div><label className="block text-sm text-gray-400 mb-2">Trailer URL</label><input value={form.trailer_url} onChange={e => setForm({...form, trailer_url: e.target.value})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
-            <div><label className="block text-sm text-gray-400 mb-2">Poster Image</label><input type="file" accept="image/*" onChange={e => setPosterFile(e.target.files[0])} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
-            <div><label className="block text-sm text-gray-400 mb-2">IBM Rating</label><input type="number" min={0} max={10} step={0.1} value={form.ibm_rating} onChange={e => setForm({...form, ibm_rating: parseFloat(e.target.value)})} className="w-full bg-dark text-white p-4 rounded-lg border border-secondary" /></div>
-            <div className="flex gap-3">
+
+            <div className="flex gap-3 mt-8">
               <button type="submit" className="bg-primary hover:bg-red-700 text-white font-bold px-8 py-3 rounded-xl">{editingId ? 'Update' : 'Add'}</button>
               {editingId && <button type="button" onClick={() => setActiveTab('movies')} className="bg-secondary text-gray-400 font-bold px-8 py-3 rounded-xl hover:text-white">Cancel</button>}
             </div>
@@ -429,9 +492,21 @@ const AdminDashboard = () => {
                 </div>
                 <p className="text-sm bg-dark/50 p-3 rounded-lg mb-4 text-gray-300">"{enq.message}"</p>
               </div>
-              <button onClick={() => handleToggleEnquiryStatus(enq._id, enq.status)} className={`w-full py-2 rounded-lg font-bold transition-colors ${enq.status === 'resolved' ? 'bg-secondary text-gray-400 hover:text-white' : 'bg-primary text-white hover:bg-red-700'}`}>
-                Mark as {enq.status === 'resolved' ? 'Pending' : 'Resolved'}
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => handleToggleEnquiryStatus(enq._id, enq.status)} className={`flex-1 py-2 rounded-lg font-bold transition-colors ${enq.status === 'resolved' ? 'bg-secondary text-gray-400 hover:text-white' : 'bg-primary text-white hover:bg-red-700'}`}>
+                  Mark as {enq.status === 'resolved' ? 'Pending' : 'Resolved'}
+                </button>
+                {enq.status === 'resolved' && (
+                  <>
+                    <a href={`mailto:${enq.email}?subject=Reply to your Enquiry: ${enq.name}`} className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold flex items-center justify-center">
+                      Reply
+                    </a>
+                    <button onClick={() => handleDeleteEnquiry(enq._id)} className="p-2 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded-lg font-bold">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -460,14 +535,29 @@ const AdminDashboard = () => {
           {/* Actors */}
           <div className="bg-secondary/50 border border-secondary rounded-xl p-6">
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><UserIcon className="w-5 h-5 text-blue-400"/> Manage Actors</h3>
-            <form onSubmit={handleAddActor} className="flex gap-2 mb-6">
-              <input type="text" placeholder="New Actor (e.g. Tom Hardy)" value={newActor} onChange={e => setNewActor(e.target.value)} className="flex-1 bg-dark text-white px-4 py-2 rounded-lg border border-secondary focus:outline-none focus:border-primary" />
-              <button type="submit" className="bg-primary hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg">Add</button>
+            <form onSubmit={handleAddActor} className="flex flex-col gap-3 mb-6">
+              <div className="flex gap-2">
+                <input type="text" placeholder="New Actor (e.g. Tom Hardy)" value={newActor} onChange={e => setNewActor(e.target.value)} className="flex-1 bg-dark text-white px-4 py-2 rounded-lg border border-secondary focus:outline-none focus:border-primary" />
+                <button type="submit" className="bg-primary hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg">Add</button>
+              </div>
+              <div className="flex gap-4 items-center">
+                <input type="file" accept="image/*" onChange={e => setNewActorPhoto(e.target.files[0])} className="flex-1 bg-dark text-gray-400 px-4 py-2 rounded-lg border border-secondary text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30" />
+                {newActorPhoto && <img src={URL.createObjectURL(newActorPhoto)} alt="Preview" className="w-10 h-10 object-cover rounded-full border border-secondary" />}
+              </div>
             </form>
             <div className="space-y-2">
               {actors.map(actor => (
                 <div key={actor._id} className="flex justify-between items-center bg-dark p-3 rounded-lg border border-secondary">
-                  <span>{actor.name}</span>
+                  <div className="flex items-center gap-3">
+                    {actor.photo_url ? (
+                      <img src={actor.photo_url} alt={actor.name} className="w-8 h-8 object-cover rounded-full border border-secondary" />
+                    ) : (
+                      <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                        <UserIcon className="w-4 h-4 text-gray-400"/>
+                      </div>
+                    )}
+                    <span>{actor.name}</span>
+                  </div>
                   <button onClick={() => handleDeleteActor(actor._id)} className="text-red-400 hover:text-red-300"><Trash2 className="w-4 h-4"/></button>
                 </div>
               ))}
