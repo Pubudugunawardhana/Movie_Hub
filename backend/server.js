@@ -33,6 +33,7 @@ const transactionRoutes = require('./routes/transactions');
 const actorRoutes = require('./routes/actors');
 const categoryRoutes = require('./routes/categories');
 const reviewRoutes = require('./routes/reviews');
+const chatbotRoutes = require('./routes/chatbot');
 
 app.use('/api/movies', movieRoutes);
 app.use('/api/auth', authRoutes);
@@ -43,6 +44,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/actors', actorRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
