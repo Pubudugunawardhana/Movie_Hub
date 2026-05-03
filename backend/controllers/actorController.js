@@ -13,7 +13,8 @@ exports.createActor = async (req, res) => {
   try {
     const actorData = { name: req.body.name };
     if (req.file) {
-      actorData.photo_url = `http://localhost:5000/uploads/${req.file.filename}`;
+      const base64Image = req.file.buffer.toString('base64');
+      actorData.photo_url = `data:${req.file.mimetype};base64,${base64Image}`;
     }
     const actor = new Actor({ ...actorData, actor_id: Date.now() });
     const savedActor = await actor.save();
