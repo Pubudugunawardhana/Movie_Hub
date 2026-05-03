@@ -15,6 +15,9 @@ import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import FAQ from './pages/FAQ';
 import Watch from './pages/Watch';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Chatbot from './components/Chatbot';
 
 function App() {
   return (
@@ -36,9 +39,12 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/watch/:id" element={<Watch />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
             </Routes>
           </main>
           <Footer />
+          <Chatbot />
         </div>
       </Router>
     </AuthProvider>
