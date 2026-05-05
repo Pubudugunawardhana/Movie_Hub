@@ -24,11 +24,16 @@ const CARD_ELEMENT_OPTIONS = {
 const CheckoutForm = ({ plan, price }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [name, setName] = useState(user?.name || '');
+
+  useEffect(() => {
+    if (user) setName(user.name);
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,27 +41,20 @@ const CheckoutForm = ({ plan, price }) => {
     setError('');
     try {
       const token = JSON.parse(localStorage.getItem('userInfo'))?.token;
-      const { data } = await axios.post(
-        'http://localhost:5000/api/payment/create-payment-intent',
-        { plan },
+      
+      // FOR TESTING SITE: Bypass Stripe entirely and just activate subscription
+      await axios.post(
+        'http://localhost:5000/api/payment/confirm',
+        { plan, price },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: { card: elements.getElement(CardElement) },
-      });
-
-      if (result.error) {
-        setError(result.error.message);
-      } else if (result.paymentIntent.status === 'succeeded') {
-        await axios.post(
-          'http://localhost:5000/api/payment/confirm',
-          { plan, price },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setSuccess(true);
-        setTimeout(() => navigate('/'), 3000);
-      }
+      
+      const updatedUser = { ...user, subscribed: true, plan: plan };
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      
+      setSuccess(true);
+      setTimeout(() => navigate('/'), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Payment failed. Please try again.');
     } finally {
@@ -80,7 +78,8 @@ const CheckoutForm = ({ plan, price }) => {
         <label className="block text-sm font-medium text-gray-400 mb-2">Cardholder Name</label>
         <input
           type="text"
-          defaultValue={user?.name || ''}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Full name on card"
           className="w-full bg-secondary text-white p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           required
@@ -91,7 +90,6 @@ const CheckoutForm = ({ plan, price }) => {
         <div className="bg-secondary p-4 rounded-lg border border-secondary hover:border-primary transition-colors">
           <CardElement options={CARD_ELEMENT_OPTIONS} />
         </div>
-        <p className="text-xs text-gray-500 mt-2">🔒 Test card: 4242 4242 4242 4242 | Exp: any future date | CVC: any 3 digits</p>
       </div>
       {error && <div className="bg-red-500/20 text-red-400 p-3 rounded-lg text-sm">{error}</div>}
       <button
