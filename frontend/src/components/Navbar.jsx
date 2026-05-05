@@ -24,7 +24,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center transition-colors duration-500 ${isScrolled ? 'bg-dark shadow-lg' : 'bg-gradient-to-b from-black/90 via-black/50 to-transparent'}`}>
+    <nav className={`fixed top-0 w-full z-[100] px-6 py-4 flex justify-between items-center transition-colors duration-500 ${isScrolled ? 'bg-dark shadow-lg' : 'bg-gradient-to-b from-black/90 via-black/50 to-transparent'}`}>
       <Link to="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tighter hover:scale-105 transition-transform">
         <Film className="w-8 h-8 fill-current" />
         <span>MOVIEHUB</span>
@@ -51,9 +51,9 @@ const Navbar = () => {
         {user ? (
           <div className="flex items-center gap-4">
             {user.subscribed ? (
-              <span className="text-[#E50914] font-bold text-xs hidden md:block capitalize border border-[#E50914]/50 px-3 py-1 rounded-full bg-[#E50914]/10">
+              <Link to="/subscription" className="text-[#E50914] font-bold text-xs hidden md:block capitalize border border-[#E50914]/50 px-3 py-1 rounded-full bg-[#E50914]/10 hover:bg-[#E50914]/20 transition-all cursor-pointer">
                 {user.plan && user.plan !== 'none' ? `${user.plan} Plan` : 'Premium Member'}
-              </span>
+              </Link>
             ) : (
               <Link to="/subscription" className="hover:text-primary transition-colors hidden md:block font-bold">Subscribe</Link>
             )}
