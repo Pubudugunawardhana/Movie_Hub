@@ -72,17 +72,6 @@ Run the development server:
 ```bash
 npm run dev
 ```
-
-## 📸 Screenshots
-
-| Admin Overview | Movie Details |
-| :---: | :---: |
-| ![Admin Dashboard](https://via.placeholder.com/400x250?text=Admin+Overview) | ![Movie Details](https://via.placeholder.com/400x250?text=Movie+Details) |
-
-| AI Chatbot | Transactions |
-| :---: | :---: |
-| ![AI Chat](https://via.placeholder.com/400x250?text=AI+Assistant) | ![Transactions](https://via.placeholder.com/400x250?text=Transaction+History) |
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
