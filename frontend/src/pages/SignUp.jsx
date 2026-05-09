@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Film } from 'lucide-react';
+import { Film, Eye, EyeOff } from 'lucide-react';
 
 const SignUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -62,16 +63,23 @@ const SignUp = () => {
               required
             />
           </div>
-          <div>
+          <div className="relative">
             <input 
-              type="password" 
+              type={showPassword ? "text" : "password"} 
               placeholder="Create Password" 
-              className="w-full bg-[#333] text-white p-4 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-[#333] text-white p-4 pr-12 rounded focus:outline-none focus:ring-2 focus:ring-primary"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
             />
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
           <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded transition-colors">
             Sign Up
