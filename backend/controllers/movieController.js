@@ -45,8 +45,13 @@ exports.searchMovies = async (req, res) => {
 exports.createMovie = async (req, res) => {
   try {
     const movieData = { ...req.body };
+    movieData.actors = req.body.actors || [];
     if (req.file) {
-      movieData.poster_url = `http://localhost:5000/uploads/${req.file.filename}`;
+      const base64Image = req.file.buffer.toString('base64');
+      movieData.poster_url = `data:${req.file.mimetype};base64,${base64Image}`;
+    }
+    if (!movieData.category) {
+      delete movieData.category;
     }
     const movie = new Movie(movieData);
     const savedMovie = await movie.save();
@@ -59,8 +64,13 @@ exports.createMovie = async (req, res) => {
 exports.updateMovie = async (req, res) => {
   try {
     const updateData = { ...req.body };
+    updateData.actors = req.body.actors || [];
     if (req.file) {
-      updateData.poster_url = `http://localhost:5000/uploads/${req.file.filename}`;
+      const base64Image = req.file.buffer.toString('base64');
+      updateData.poster_url = `data:${req.file.mimetype};base64,${base64Image}`;
+    }
+    if (!updateData.category) {
+      delete updateData.category;
     }
     const updatedMovie = await Movie.findOneAndUpdate({ movie_id: req.params.id }, updateData, { new: true });
     if (!updatedMovie) return res.status(404).json({ message: 'Movie not found' });
