@@ -35,4 +35,15 @@ router.put('/:id', protect, admin, async (req, res) => {
   }
 });
 
+// Admin - delete enquiry
+router.delete('/:id', protect, admin, async (req, res) => {
+  try {
+    const enquiry = await Enquiry.findByIdAndDelete(req.params.id);
+    if (!enquiry) return res.status(404).json({ message: 'Enquiry not found' });
+    res.json({ message: 'Enquiry deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
