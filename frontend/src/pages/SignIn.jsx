@@ -1,11 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Film } from 'lucide-react';
+import { Film, Eye, EyeOff } from 'lucide-react';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -55,15 +56,22 @@ const SignIn = () => {
               required
             />
           </div>
-          <div>
+          <div className="relative">
             <input 
-              type="password" 
+              type={showPassword ? "text" : "password"} 
               placeholder="Password" 
-              className="w-full bg-[#333] text-white p-4 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-[#333] text-white p-4 pr-12 rounded focus:outline-none focus:ring-2 focus:ring-primary"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
           <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded transition-colors">
             Sign In
@@ -72,7 +80,7 @@ const SignIn = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" className="w-4 h-4 accent-gray-500" /> Remember me
             </label>
-            <a href="#" className="hover:underline">Need help?</a>
+            <Link to="/forgot-password" title="Forgot Password" className="hover:underline">Forgot password?</Link>
           </div>
         </form>
         <p className="text-gray-400 mt-8">
