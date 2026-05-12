@@ -14,8 +14,10 @@ const Search = () => {
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/movies/search?query=${query}&language=${language}`);
+      const currentQuery = searchParams.get('q') || '';
+      const res = await axios.get(`http://localhost:5000/api/movies/search?query=${currentQuery}&language=${language}`);
       setMovies(res.data);
+      if (currentQuery !== query) setQuery(currentQuery);
     } catch (err) {
       console.error(err);
     } finally {
