@@ -29,6 +29,8 @@ exports.updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         isAdmin: updatedUser.isAdmin,
+        subscribed: updatedUser.subscribed,
+        plan: updatedUser.plan,
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -72,6 +74,7 @@ exports.toggleUserStatus = async (req, res) => {
         email: updatedUser.email,
         isAdmin: updatedUser.isAdmin,
         subscribed: updatedUser.subscribed,
+        plan: updatedUser.plan,
         isActive: updatedUser.isActive
       });
     } else {
