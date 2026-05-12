@@ -31,11 +31,10 @@ router.post('/create-payment-intent', protect, async (req, res) => {
   }
 });
 
-// Confirm subscription after payment
 router.post('/confirm', protect, async (req, res) => {
   try {
     const { plan, price } = req.body;
-    await User.findByIdAndUpdate(req.user._id, { subscribed: true });
+    await User.findByIdAndUpdate(req.user._id, { subscribed: true, plan: plan || 'standard' });
     
     // Log transaction
     const transaction = new Transaction({
