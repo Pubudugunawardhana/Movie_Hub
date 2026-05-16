@@ -1,8 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { User, Mail, Lock, Trash2, Save } from 'lucide-react';
+import { User, Mail, Lock, Trash2, Save, Crown, ArrowRight } from 'lucide-react';
 
 const UserProfile = () => {
   const { user, logout } = useContext(AuthContext);
@@ -13,6 +13,13 @@ const UserProfile = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
 
   const getAuthHeader = () => ({
     headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfo'))?.token}` }
@@ -81,6 +88,43 @@ const UserProfile = () => {
               <Save className="w-4 h-4" /> {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </form>
+
+          <hr className="border-secondary my-8" />
+
+          {/* Subscription Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Crown className="w-5 h-5 text-yellow-400" /> Subscription</h3>
+            {user?.subscribed ? (
+              <div className="bg-gradient-to-r from-[#E50914]/10 to-transparent border border-[#E50914]/30 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Current Plan</p>
+                    <p className="text-2xl font-bold text-white capitalize">{user.plan || 'Premium'} Plan</p>
+                    <span className="text-xs text-green-400 font-semibold">✓ Active</span>
+                  </div>
+                  <button
+                    onClick={() => navigate('/subscription')}
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-5 py-2.5 rounded-xl transition-all"
+                  >
+                    Change Plan <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-secondary/30 border border-secondary rounded-xl p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-white font-semibold">No Active Subscription</p>
+                  <p className="text-gray-500 text-sm">Subscribe to unlock all movies and series</p>
+                </div>
+                <button
+                  onClick={() => navigate('/subscription')}
+                  className="flex items-center gap-2 bg-[#E50914] hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all"
+                >
+                  Subscribe Now <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
 
           <hr className="border-secondary my-8" />
 
