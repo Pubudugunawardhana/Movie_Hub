@@ -13,4 +13,14 @@ router.get('/', protect, admin, async (req, res) => {
   }
 });
 
+// Delete all transactions
+router.delete('/', protect, admin, async (req, res) => {
+  try {
+    await Transaction.deleteMany({});
+    res.json({ message: 'All transactions deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
